@@ -1,33 +1,58 @@
 import { Injectable } from '@angular/core';
-import {WeatherService} from "./weather.service";
+import { BehaviorSubject, Observable } from 'rxjs';
 
 export const LOCATIONS : string = "locations";
 
 @Injectable()
 export class LocationService {
 
-  locations : string[] = [];
+  // choix du BehaviourSubject car valeur intiale possible et emet toujours la dernière valeur.
+  // Donc tous les subscribers synchronisés. 
+  private locationsSubject: BehaviorSubject<string[]> = new BehaviorSubject<string[]>([]);
 
-  constructor(private weatherService : WeatherService) {
-    let locString = localStorage.getItem(LOCATIONS);
-    if (locString)
+  private locations: string[] = [];
+
+  constructor() {
+    let locString:string = localStorage.getItem(LOCATIONS);
+    if (locString) 
+    {
       this.locations = JSON.parse(locString);
-    for (let loc of this.locations)
-      this.weatherService.addCurrentConditions(loc);
+      console.log("locations", this.locations)
+      this.locationsSubject.next(this.locations)
+    }
+  }
+  
+  public getLocationsObservable(): Observable<string[]> {
+    return this.locationsSubject.asObservable();
   }
 
-  addLocation(zipcode : string) {
-    this.locations.push(zipcode);
-    localStorage.setItem(LOCATIONS, JSON.stringify(this.locations));
-    this.weatherService.addCurrentConditions(zipcode);
+  public addLocation(newLocation: string): void {
+    const index: number = this.locations.indexOf(newLocation);
+    if(index === -1) {
+      this.locations.push(newLocation);
+      localStorage.setItem(LOCATIONS, JSON.stringify(this.locations));
+      this.locationsSubject.next(this.locations);
+    } else {
+      console.log(`location ${newLocation} already exist`);
+    }
   }
 
-  removeLocation(zipcode : string) {
-    let index = this.locations.indexOf(zipcode);
-    if (index !== -1){
+  public removeLocation(location: string): void {
+    let index = this.locations.indexOf(location);
+    if (index !== -1)
+    {
       this.locations.splice(index, 1);
       localStorage.setItem(LOCATIONS, JSON.stringify(this.locations));
-      this.weatherService.removeCurrentConditions(zipcode);
+      const currentLocations: string[] = this.locationsSubject.value;
+      this.locationsSubject.next(currentLocations.filter(loc => loc !== location));
+      console.log(`location ${location} deleted`)
     }
+  }
+
+  
+  public clearLocations(): void {
+    this.locations = [];
+    localStorage.setItem(LOCATIONS, JSON.stringify(this.locations));
+    this.locationsSubject.next([]);
   }
 }
