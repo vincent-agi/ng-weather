@@ -90,6 +90,9 @@
               "src/manifest.json"
             ]
           }
+        },
+        "deploy": {
+          "builder": "angular-cli-ghpages:deploy"
         }
       }
     },
