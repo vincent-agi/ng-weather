@@ -43,8 +43,7 @@ export class LocationService {
     {
       this.locations.splice(index, 1);
       localStorage.setItem(LOCATIONS, JSON.stringify(this.locations));
-      const currentLocations: string[] = this.locationsSubject.value;
-      this.locationsSubject.next(currentLocations.filter(loc => loc !== location));
+      this.locationsSubject.next(this.locations.filter(loc => loc !== location));
       console.log(`location ${location} deleted`)
     }
   }

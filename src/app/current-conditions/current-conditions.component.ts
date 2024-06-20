@@ -36,8 +36,9 @@ export class CurrentConditionsComponent implements OnInit {
     this.locationsSubscription.unsubscribe();
   }
 
-  public removeLocation(location: string): void {
+  public removeLocation(location: string, event:Event): void {
     this.locationService.removeLocation(location);
+    event.stopPropagation();
   }
 
   public clearLocations(): void {

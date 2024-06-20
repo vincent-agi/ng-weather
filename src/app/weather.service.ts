@@ -30,23 +30,20 @@ export class WeatherService {
     }
 
   public addCurrentConditions(zipcode: string): void {
-    // Here we make a request to get the current conditions data from the API. Note the use of backticks and an expression to insert the zipcode
     this.http.get<CurrentConditions>(`${WeatherService.URL}/weather?zip=${zipcode},us&units=imperial&APPID=${WeatherService.APPID}`)
       .subscribe(data => {
         this.currentConditions.update(conditions => {
-          // Vérifiez si le zipcode existe déjà dans les conditions actuelles
           const exists = conditions.some(condition => condition.zip === zipcode);
           if (!exists) {
-            // Ajoutez uniquement si le zipcode n'existe pas déjà
             return [...conditions, { zip: zipcode, data }];
           }
-          // Retournez les conditions sans modification si le zipcode existe déjà
           return conditions;
         });
     })
   }
 
   public removeCurrentConditions(zipcode: string) {
+    this.locationService.removeLocation(zipcode);
     this.currentConditions.update(conditions => {
       for (let i in conditions) {
         if (conditions[i].zip == zipcode)
