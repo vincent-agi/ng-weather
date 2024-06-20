@@ -1,11 +1,13 @@
-import {Injectable, Signal, signal} from '@angular/core';
-import {BehaviorSubject, Observable, Subscription} from 'rxjs';
+import {Injectable, Signal, inject, signal} from '@angular/core';
+import { Observable, Subscription, of} from 'rxjs';
+import { tap } from 'rxjs/operators';
 
 import {HttpClient} from '@angular/common/http';
 import {CurrentConditions} from './current-conditions/current-conditions.type';
 import {ConditionsAndZip} from './conditions-and-zip.type';
 import {Forecast} from './forecasts-list/forecast.type';
 import { LocationService } from './location.service';
+import { CacheService } from './cache.service';
 
 @Injectable()
 export class WeatherService {
@@ -16,6 +18,16 @@ export class WeatherService {
   private currentConditions = signal<ConditionsAndZip[]>([]);
 
   public locationsSubscription: Subscription;
+
+  private readonly miliseconde: number = 1000;
+  private readonly minute: number = 60;
+  private readonly seconde: number = 60;
+  private readonly hour: number = 2;
+
+  // 2 heures de cache programmées en readonly
+  private readonly cacheDuration:number = this.hour * this.minute * this.seconde * this.miliseconde;
+
+  private readonly cacheService: CacheService = inject(CacheService);
 
   constructor(
     private readonly http: HttpClient,
@@ -53,8 +65,26 @@ export class WeatherService {
     })
   }
 
-  public getCurrentConditions(): Signal<ConditionsAndZip[]> {
-    return this.currentConditions.asReadonly();
+  public getCurrentConditions(): Signal<ConditionsAndZip[]>{
+    const cacheKey = `currentConditions_${location}`;
+    const cachedData:Signal<ConditionsAndZip[]> = this.cacheService.get(cacheKey);
+    if (cachedData) {
+      return cachedData;
+    } else {
+      return this.currentConditions.asReadonly();
+    }
+  }
+
+  getFiveDayForecast(location: string): Observable<any> {
+    const cacheKey = `fiveDayForecast_${location}`;
+    const cachedData = this.cacheService.get(cacheKey);
+    if (cachedData) {
+      return of(cachedData);
+    } else {
+      return this.getForecast(location).pipe(
+        tap(data => this.cacheService.set(cacheKey, data, this.cacheDuration))
+      );
+    }
   }
 
   public getForecast(zipcode: string): Observable<Forecast> {
@@ -84,3 +114,5 @@ export class WeatherService {
     this.locationsSubscription.unsubscribe();
   }
 }
+
+
