@@ -1,0 +1,20 @@
+.tab-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-bottom: none;
+    cursor: pointer;
+  }
+  .tab-header.active {
+    font-weight: bold;
+    background-color: #eee;
+  }
+  .tab-body {
+    padding: 10px;
+    border: 1px solid #ccc;
+
+    .content {
+        display: flex;
+    }
+  }

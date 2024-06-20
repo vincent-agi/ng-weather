@@ -12,33 +12,25 @@ import { Subscription } from 'rxjs/internal/Subscription';
 })
 export class CurrentConditionsComponent implements OnInit {
 
-  private locations: string[] = [];
-  private locationsSubscription: Subscription;
+  private locationSubscription: Subscription;
 
   private readonly weatherService = inject(WeatherService);
   private readonly router = inject(Router);
   protected readonly locationService = inject(LocationService);
   protected currentConditionsByZip: Signal<ConditionsAndZip[]> = this.weatherService.getCurrentConditions();
 
-  public ngOnInit(): void {
-    this.locationsSubscription = this.locationService.getLocationsObservable()
-      .subscribe(locations => {
-        console.log("locations current comp : ", locations)
-        this.locations = locations;
-      });
+  ngOnInit(): void {
+    this.locationSubscription = this.locationService.getLocationsObservable().subscribe();
+  }
+
+  ngOnDestroy(): void {
+    if (this.locationSubscription) {
+      this.locationSubscription.unsubscribe();
+    }
   }
 
   public showForecast(zipcode : string){
     this.router.navigate(['/forecast', zipcode])
-  }
-
-  public ngOnDestroy(): void {
-    this.locationsSubscription.unsubscribe();
-  }
-
-  public removeLocation(location: string, event:Event): void {
-    this.locationService.removeLocation(location);
-    event.stopPropagation();
   }
 
   public clearLocations(): void {

@@ -83,5 +83,4 @@ export class WeatherService {
   public ngOnDestroy(): void {
     this.locationsSubscription.unsubscribe();
   }
-
 }

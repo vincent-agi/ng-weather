@@ -1,21 +1,25 @@
-<div>
-  <div *ngFor="let location of currentConditionsByZip()" class="well flex" (click)="showForecast(location.zip)">
-    <div>
-      <h3>{{location.data.name}} ({{location.zip}})</h3>
-      <h4>Current conditions: {{location.data.weather[0].main}}</h4>
-      <h4>Temperatures today:</h4>
-      <p>
-        Current {{location.data.main.temp | number:'.0-0'}}
-        - Max {{location.data.main.temp_max | number:'.0-0'}}
-        - Min {{location.data.main.temp_min | number:'.0-0'}}
-      </p>
-      <p>
-        <a [routerLink]="['/forecast', location.zip]" >Show 5-day forecast for {{location.data.name}}</a>
-      </p>
-    </div>
-    <div>
-      <span class="close" (click)="removeLocation(location.zip, $event)">&times;</span>
-      <img [src]="weatherService.getWeatherIcon(location.data.weather[0].id)">
-    </div>
- </div>
-</div>
+<!-- Je pourrai améliorer le composant app-tabs afin d'avoir un "main-content" dans lequel s'affiche le app-tab -->
+<!-- J'ai malheureusement des contraites de temps pour le réaliser après avoir pris un mauvais chemin pour la step 1 -->
+<div class="tabs">
+  <app-tabs>
+    <app-tab *ngFor="let location of currentConditionsByZip()">
+      <div tab-title><h3>{{location.data.name}} (<span #location>{{location.zip}}</span>)</h3></div>
+      <div tab-content>
+        <div class="content">
+          <div class="weather">
+            <h4>Current conditions: {{location.data.weather[0].main}}</h4>
+            <h4>Temperatures today:</h4>
+            <p>
+              Current {{location.data.main.temp | number:'.0-0'}}
+              - Max {{location.data.main.temp_max | number:'.0-0'}}
+              - Min {{location.data.main.temp_min | number:'.0-0'}}
+            </p>
+            <p>
+              <a [routerLink]="['/forecast', location.zip]" >Show 5-day forecast for {{location.data.name}}</a>
+            </p>
+          </div>
+            <img class="weather-image" [src]="weatherService.getWeatherIcon(location.data.weather[0].id)">
+        </div>
+      </div>
+    </app-tab>
+  </app-tabs>

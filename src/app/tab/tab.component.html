@@ -1,0 +1,7 @@
+<div class="tab-header" (click)="selectTab()">
+    <ng-content select="[tab-title]"></ng-content>
+    <button (click)="closeTab($event)">X</button>
+</div>
+<div class="tab-body" *ngIf="isActive">
+    <ng-content select="[tab-content]"></ng-content>
+</div>
